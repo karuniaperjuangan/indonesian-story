@@ -18,5 +18,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # wget https://image-search.uncool.ai/"$HF_TOKEN"/1
           git push https://cahya:$HF_TOKEN@huggingface.co/spaces/cahya/indonesian-story main
