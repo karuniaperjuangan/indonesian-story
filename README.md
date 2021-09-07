@@ -1,11 +1,11 @@
 ---
-title: Indonesian Story
+title: Indonesian Story Generator
 emoji: 🔥
-colorFrom: pink
-colorTo: indigo
+colorFrom: green
+colorTo: orange
 sdk: streamlit
-app_file: app.py
-pinned: false
+app_file: app/app.py
+pinned: true
 ---
 # Configuration
 `title`: _string_  
@@ -25,4 +25,3 @@ Path is relative to the root of the repository.
 Whether the Space stays on top of your list.
 
 # Indonesian Story
-GPT2 generated Stories / Poems
