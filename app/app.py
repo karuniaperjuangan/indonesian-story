@@ -14,16 +14,16 @@ model_name = "cahya/gpt2-small-indonesian-story"
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_generator():
-    st.write("Loading the GPT2 model...")
+    st.write(f"Loading the GPT2 model {model_name}, please wait...")
     text_generator = pipeline('text-generation', model=model_name)
     return text_generator
 
 
 #@st.cache(suppress_st_warning=True)
 def process(text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
-            temperature: float = 1.0, max_time: float = None):
+            temperature: float = 1.0, max_time: float = None, seed=42):
     st.write("Cache miss: process")
-    set_seed(42)
+    set_seed(seed)
     result = text_generator(text, max_length=max_length, do_sample=do_sample,
                             top_k=top_k, top_p=top_p, temperature=temperature, max_time=max_time)
     return result
@@ -58,6 +58,13 @@ else:
 
 session_state.text = st.text_area("Enter text", session_state.prompt_box)
 
+max_length = st.sidebar.number_input(
+    "Maximum length",
+    value=100,
+    max_value=512,
+    help="The maximum length of the sequence to be generated."
+)
+
 temp = st.sidebar.slider(
     "Temperature",
     value=1.0,
@@ -80,7 +87,7 @@ if st.button("Run"):
     with st.spinner(text="Getting results..."):
         st.subheader("Result")
         time_start = time.time()
-        result = process(text=session_state.text, top_k=int(top_k), top_p=float(top_p))
+        result = process(text=session_state.text, max_length=int(max_length), top_k=int(top_k), top_p=float(top_p))
         time_end = time.time()
         time_diff = time_end-time_start
         #print(f"Text generated in {time_diff} seconds")
