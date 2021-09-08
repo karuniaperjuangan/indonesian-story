@@ -19,13 +19,13 @@ def get_generator():
     return text_generator
 
 
-@st.cache(suppress_st_warning=True)
+#@st.cache(suppress_st_warning=True)
 def process(text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
             temperature: float = 1.0, max_time: float = None):
     st.write("Cache miss: process")
     set_seed(42)
     result = text_generator(text, max_length=max_length, do_sample=do_sample,
-                                                 top_k=top_k, top_p=top_p, temperature=temperature, max_time=max_time)
+                            top_k=top_k, top_p=top_p, temperature=temperature, max_time=max_time)
     return result
 
 
