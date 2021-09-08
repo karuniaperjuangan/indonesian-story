@@ -1,8 +1,8 @@
 ---
 title: Indonesian Story Generator
 emoji: 🔥
-colorFrom: green
-colorTo: orange
+colorFrom: red
+colorTo: white
 sdk: streamlit
 app_file: app/app.py
 pinned: true
