@@ -5,6 +5,7 @@ from prompts import PROMPT_LIST
 import random
 import time
 from transformers import pipeline, set_seed
+import tokenizers
 
 # st.set_page_config(page_title="Image Search")
 
@@ -19,13 +20,14 @@ def get_generator():
     return text_generator
 
 
-#@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True, hash_funcs={tokenizers.Tokenizer: id})
 def process(text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
-            temperature: float = 1.0, max_time: float = None, seed=42):
-    # st.write("Cache miss: process")
+            temperature: float = 1.0, max_time: float = 10.0, seed=42):
+    st.write("Cache miss: process")
     set_seed(seed)
     result = text_generator(text, max_length=max_length, do_sample=do_sample,
-                            top_k=top_k, top_p=top_p, temperature=temperature, max_time=max_time)
+                            top_k=top_k, top_p=top_p, temperature=temperature,
+                            max_time=max_time)
     return result
 
 
@@ -65,37 +67,55 @@ max_length = st.sidebar.number_input(
     help="The maximum length of the sequence to be generated."
 )
 
-temp = st.sidebar.slider(
+temperature = st.sidebar.slider(
     "Temperature",
     value=1.0,
     min_value=0.0,
-    max_value=100.0
+    max_value=10.0
 )
 
-top_k = st.sidebar.number_input(
-    "Top k",
-    value=25
+do_sample = st.sidebar.checkbox(
+    "Use sampling",
+    value=True
 )
 
-top_p = st.sidebar.number_input(
-    "Top p",
-    value=0.95
+top_k = 25
+top_p = 0.95
+
+if do_sample:
+    top_k = st.sidebar.number_input(
+        "Top k",
+        value=top_k
+    )
+    top_p = st.sidebar.number_input(
+        "Top p",
+        value=top_p
+    )
+
+seed = st.sidebar.number_input(
+    "Random Seed",
+    value=25,
+    help="The number used to initialize a pseudorandom number generator"
 )
+
 
 text_generator = get_generator()
 if st.button("Run"):
     with st.spinner(text="Getting results..."):
         st.subheader("Result")
         time_start = time.time()
-        result = process(text=session_state.text, max_length=int(max_length), top_k=int(top_k), top_p=float(top_p))
+        result = process(text=session_state.text, max_length=int(max_length),
+                         temperature=temperature, do_sample=do_sample,
+                         top_k=int(top_k), top_p=float(top_p), seed=seed)
         time_end = time.time()
         time_diff = time_end-time_start
-        #print(f"Text generated in {time_diff} seconds")
         result = result[0]["generated_text"]
         st.write(result.replace("\n", "  \n"))
         st.text("Translation")
         translation = translate(result, "en", "id")
         st.write(translation.replace("\n", "  \n"))
+        # st.write(f"*do_sample: {do_sample}, top_k: {top_k}, top_p: {top_p}, seed: {seed}*")
+        st.write(f"*Text generated in {time_diff:.5} seconds*")
 
         # Reset state
         session_state.prompt = None

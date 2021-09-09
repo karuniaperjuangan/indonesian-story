@@ -4,4 +4,5 @@ transformers
 datasets
 mtranslate
 # streamlit version 0.67.1 is needed due to issue with caching
-streamlit==0.67.1
+# streamlit==0.67.1
+streamlit
