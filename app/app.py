@@ -6,8 +6,9 @@ import random
 import time
 from transformers import pipeline, set_seed
 import tokenizers
+import psutil
 
-# st.set_page_config(page_title="Image Search")
+# st.set_page_config(page_title="Indonesian Story Generator")
 
 # vector_length = 128
 model_name = "cahya/gpt2-small-indonesian-story"
@@ -102,6 +103,7 @@ seed = st.sidebar.number_input(
 text_generator = get_generator()
 if st.button("Run"):
     with st.spinner(text="Getting results..."):
+        memory = psutil.virtual_memory()
         st.subheader("Result")
         time_start = time.time()
         result = process(text=session_state.text, max_length=int(max_length),
@@ -115,6 +117,7 @@ if st.button("Run"):
         translation = translate(result, "en", "id")
         st.write(translation.replace("\n", "  \n"))
         # st.write(f"*do_sample: {do_sample}, top_k: {top_k}, top_p: {top_p}, seed: {seed}*")
+        st.write(f"*Memory: {memory}*")
         st.write(f"*Text generated in {time_diff:.5} seconds*")
 
         # Reset state
