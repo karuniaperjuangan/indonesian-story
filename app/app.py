@@ -117,7 +117,7 @@ if st.button("Run"):
         translation = translate(result, "en", "id")
         st.write(translation.replace("\n", "  \n"))
         # st.write(f"*do_sample: {do_sample}, top_k: {top_k}, top_p: {top_p}, seed: {seed}*")
-        st.write(f"*Memory: {memory}*")
+        st.write(f"*Memory: {memory.total/(1024*1024*1024):.2f}GB, used: {memory.percent}%*")
         st.write(f"*Text generated in {time_diff:.5} seconds*")
 
         # Reset state
