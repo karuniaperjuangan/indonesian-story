@@ -10,16 +10,28 @@ import psutil
 
 # st.set_page_config(page_title="Indonesian Story Generator")
 
-# vector_length = 128
-model_name = "cahya/gpt2-small-indonesian-story"
+MODELS = {
+    "GPT-2 Small finetuned on Indonesian stories": {
+        "name": "cahya/gpt2-small-indonesian-story"
+    },
+    "GPT-2 Medium finetuned on Indonesian stories": {
+        "name": "cahya/gpt2-medium-indonesian-story"
+    },
+}
+
+model = st.selectbox('Model',([
+    'GPT-2 Small finetuned on Indonesian stories',
+    'GPT-2 Medium finetuned on Indonesian stories']))
+
+if model in ["GPT-2 Small finetuned on Indonesian stories", "GPT-2 Medium finetuned on Indonesian stories"]:
+    prompt_group_name = "Indonesian Stories"
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def get_generator():
+def get_generator(model_name: str):
     st.write(f"Loading the GPT2 model {model_name}, please wait...")
     text_generator = pipeline('text-generation', model=model_name)
     return text_generator
-
 
 @st.cache(suppress_st_warning=True, hash_funcs={tokenizers.Tokenizer: id})
 def process(text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
@@ -39,9 +51,13 @@ st.markdown(
     This application is a demo for Indonesian Story Generator using GPT2.
     """
 )
+
+
 session_state = SessionState.get(prompt=None, prompt_box=None, text=None)
-ALL_PROMPTS = list(PROMPT_LIST.keys())+["Custom"]
+
+ALL_PROMPTS = list(PROMPT_LIST[prompt_group_name].keys())+["Custom"]
 prompt = st.selectbox('Prompt', ALL_PROMPTS, index=len(ALL_PROMPTS)-1)
+
 # Update prompt
 if session_state.prompt is None:
     session_state.prompt = prompt
