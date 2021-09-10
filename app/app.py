@@ -12,14 +12,16 @@ import psutil
 
 MODELS = {
     "GPT-2 Small finetuned on Indonesian stories": {
-        "name": "cahya/gpt2-small-indonesian-story"
+        "name": "cahya/gpt2-small-indonesian-story",
+        "text_generator": None
     },
     "GPT-2 Medium finetuned on Indonesian stories": {
-        "name": "cahya/gpt2-medium-indonesian-story"
+        "name": "cahya/gpt2-medium-indonesian-story",
+        "text_generator": None
     },
 }
 
-model = st.selectbox('Model',([
+model = st.sidebar.selectbox('Model',([
     'GPT-2 Small finetuned on Indonesian stories',
     'GPT-2 Medium finetuned on Indonesian stories']))
 
@@ -34,7 +36,7 @@ def get_generator(model_name: str):
     return text_generator
 
 @st.cache(suppress_st_warning=True, hash_funcs={tokenizers.Tokenizer: id})
-def process(text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
+def process(text_generator, text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
             temperature: float = 1.0, max_time: float = 10.0, seed=42):
     # st.write("Cache miss: process")
     set_seed(seed)
@@ -56,6 +58,10 @@ st.markdown(
 session_state = SessionState.get(prompt=None, prompt_box=None, text=None)
 
 ALL_PROMPTS = list(PROMPT_LIST[prompt_group_name].keys())+["Custom"]
+
+print("# Prompt list", PROMPT_LIST)
+print("# All Prompt", ALL_PROMPTS)
+
 prompt = st.selectbox('Prompt', ALL_PROMPTS, index=len(ALL_PROMPTS)-1)
 
 # Update prompt
@@ -72,8 +78,11 @@ else:
 if session_state.prompt == "Custom":
     session_state.prompt_box = "Enter your text here"
 else:
+    print(f"# prompt: {session_state.prompt}")
+    print(f"# prompt_box: {session_state.prompt_box}")
+    print(f"# PROMPT_LIST: {PROMPT_LIST.keys()}")
     if session_state.prompt is not None and session_state.prompt_box is None:
-        session_state.prompt_box = random.choice(PROMPT_LIST[session_state.prompt])
+        session_state.prompt_box = random.choice(PROMPT_LIST[prompt_group_name][session_state.prompt])
 
 session_state.text = st.text_area("Enter text", session_state.prompt_box)
 
@@ -96,7 +105,7 @@ do_sample = st.sidebar.checkbox(
     value=True
 )
 
-top_k = 25
+top_k = 40
 top_p = 0.95
 
 if do_sample:
@@ -115,14 +124,16 @@ seed = st.sidebar.number_input(
     help="The number used to initialize a pseudorandom number generator"
 )
 
-
-text_generator = get_generator()
+for group_name in MODELS:
+    MODELS[group_name]["text_generator"] = get_generator(MODELS[group_name]["name"])
+# text_generator = get_generator()
 if st.button("Run"):
     with st.spinner(text="Getting results..."):
         memory = psutil.virtual_memory()
         st.subheader("Result")
         time_start = time.time()
-        result = process(text=session_state.text, max_length=int(max_length),
+        # text_generator = MODELS[model]["text_generator"]
+        result = process(MODELS[model]["text_generator"], text=session_state.text, max_length=int(max_length),
                          temperature=temperature, do_sample=do_sample,
                          top_k=int(top_k), top_p=float(top_p), seed=seed)
         time_end = time.time()
@@ -133,8 +144,11 @@ if st.button("Run"):
         translation = translate(result, "en", "id")
         st.write(translation.replace("\n", "  \n"))
         # st.write(f"*do_sample: {do_sample}, top_k: {top_k}, top_p: {top_p}, seed: {seed}*")
-        st.write(f"*Memory: {memory.total/(1024*1024*1024):.2f}GB, used: {memory.percent}%*, available: {memory.available/(1024*1024*1024):.2f}GB")
-        st.write(f"*Text generated in {time_diff:.5} seconds*")
+        info = f"""
+        *Memory: {memory.total/(1024*1024*1024):.2f}GB, used: {memory.percent}%, available: {memory.available/(1024*1024*1024):.2f}GB*        
+        *Text generated in {time_diff:.5} seconds*
+        """
+        st.write(info)
 
         # Reset state
         session_state.prompt = None
