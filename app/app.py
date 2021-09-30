@@ -35,7 +35,8 @@ def get_generator(model_name: str):
     text_generator = pipeline('text-generation', model=model_name)
     return text_generator
 
-@st.cache(suppress_st_warning=True, hash_funcs={tokenizers.Tokenizer: id})
+# Disable the st.cache for this function due to issue on newer version of streamlit
+# @st.cache(suppress_st_warning=True, hash_funcs={tokenizers.Tokenizer: id})
 def process(text_generator, text: str, max_length: int = 100, do_sample: bool = True, top_k: int = 50, top_p: float = 0.95,
             temperature: float = 1.0, max_time: float = 60.0, seed=42):
     # st.write("Cache miss: process")
