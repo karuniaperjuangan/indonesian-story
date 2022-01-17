@@ -32,7 +32,7 @@ if model in ["GPT-2 Small finetuned on Indonesian stories", "GPT-2 Medium finetu
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_generator(model_name: str):
     st.write(f"Loading the GPT2 model {model_name}, please wait...")
-    text_generator = pipeline('text-generation', model=model_name)
+    text_generator = pipeline('text-generation', model=model_name, device=0)
     return text_generator
 
 # Disable the st.cache for this function due to issue on newer version of streamlit
